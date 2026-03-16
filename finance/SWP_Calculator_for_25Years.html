@@ -1,457 +1,552 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SWP Calculator – Systematic Withdrawal Plan</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg:         #0d0d0f;
-    --surface:    #131316;
-    --card:       #1a1a1f;
-    --card2:      #1f1f26;
-    --border:     #2a2a35;
-    --gold:       #c9a84c;
-    --gold-light: #e6c96e;
-    --gold-dim:   #7a6130;
-    --gold-glow:  rgba(201,168,76,0.12);
-    --green:      #2db87a;
-    --green-dim:  rgba(45,184,122,0.15);
-    --red:        #e05c5c;
-    --red-dim:    rgba(224,92,92,0.12);
-    --blue:       #5b9bd5;
-    --blue-dim:   rgba(91,155,213,0.12);
-    --text:       #e8e8ec;
-    --text-mid:   #9898a8;
-    --text-dim:   #5a5a6a;
-    --row-alt:    rgba(255,255,255,0.025);
-    --shadow:     0 8px 40px rgba(0,0,0,0.6);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── Background texture ── */
-  body::before {
-    content: '';
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background:
-      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.07) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 40% at 90% 90%, rgba(91,155,213,0.04) 0%, transparent 50%);
-  }
-
-  .container {
-    position: relative; z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-  }
-
-  /* ── Header ── */
-  .header { text-align: center; margin-bottom: 48px; }
-
-  .header-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--gold-glow);
-    border: 1px solid var(--gold-dim);
-    border-radius: 40px;
-    padding: 6px 18px;
-    font-size: 11px; font-weight: 600; letter-spacing: 2px;
-    color: var(--gold); text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-
-  .header-badge::before {
-    content: '◆'; font-size: 8px;
-  }
-
-  h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(32px, 5vw, 54px);
-    font-weight: 900;
-    line-height: 1.1;
-    letter-spacing: -1px;
-    background: linear-gradient(135deg, #e8d8a0 0%, var(--gold) 40%, #c08c2a 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 12px;
-  }
-
-  .header-sub {
-    color: var(--text-mid); font-size: 15px; font-weight: 300;
-    letter-spacing: 0.3px;
-  }
-
-  /* ── Controls card ── */
-  .controls-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px;
-    margin-bottom: 32px;
-    box-shadow: var(--shadow);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .controls-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
-
-  .controls-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 13px; font-weight: 600;
-    color: var(--gold); text-transform: uppercase; letter-spacing: 2px;
-    margin-bottom: 24px;
-  }
-
-  .controls-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-  }
-
-  .input-group { display: flex; flex-direction: column; gap: 8px; }
-
-  .input-label {
-    font-size: 11px; font-weight: 600;
-    color: var(--text-mid); text-transform: uppercase; letter-spacing: 1.5px;
-  }
-
-  .input-wrapper {
-    position: relative; display: flex; align-items: center;
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    overflow: hidden;
-  }
-
-  .input-wrapper:focus-within {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px var(--gold-glow);
-  }
-
-  .input-prefix {
-    padding: 0 14px;
-    color: var(--gold); font-size: 16px; font-weight: 600;
-    border-right: 1px solid var(--border);
-    height: 48px; display: flex; align-items: center;
-    background: var(--gold-glow); flex-shrink: 0;
-  }
-
-  .input-suffix {
-    padding: 0 14px;
-    color: var(--gold); font-size: 14px; font-weight: 600;
-    border-left: 1px solid var(--border);
-    height: 48px; display: flex; align-items: center;
-    background: var(--gold-glow); flex-shrink: 0;
-  }
-
-  .control-input {
-    flex: 1; height: 48px;
-    background: transparent;
-    border: none; outline: none;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 16px; font-weight: 500;
-    padding: 0 16px;
-    text-align: right;
-  }
-
-  .input-hint {
-    font-size: 11px; color: var(--text-dim); letter-spacing: 0.3px;
-  }
-
-  /* Slider */
-  .slider-row { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
-
-  input[type="range"] {
-    flex: 1; height: 4px; -webkit-appearance: none;
-    background: linear-gradient(to right, var(--gold) 0%, var(--gold) var(--pct, 50%), var(--border) var(--pct, 50%), var(--border) 100%);
-    border-radius: 4px; cursor: pointer;
-  }
-
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 18px; height: 18px;
-    background: var(--gold); border-radius: 50%;
-    box-shadow: 0 0 0 3px var(--bg), 0 0 12px var(--gold-glow);
-    transition: transform 0.15s;
-  }
-
-  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-
-  .slider-val {
-    font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
-    color: var(--gold); min-width: 42px; text-align: right;
-  }
-
-  /* ── Metrics strip ── */
-  .metrics-strip {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  .metric-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px 18px;
-    position: relative; overflow: hidden;
-    transition: transform 0.2s, border-color 0.2s;
-  }
-
-  .metric-card:hover { transform: translateY(-2px); border-color: var(--gold-dim); }
-
-  .metric-card.highlight {
-    border-color: var(--gold-dim);
-    background: linear-gradient(135deg, var(--card) 60%, rgba(201,168,76,0.06));
-  }
-
-  .metric-card.green-card {
-    border-color: rgba(45,184,122,0.25);
-    background: linear-gradient(135deg, var(--card) 60%, rgba(45,184,122,0.05));
-  }
-
-  .metric-label {
-    font-size: 10px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 1.5px; color: var(--text-dim); margin-bottom: 8px;
-  }
-
-  .metric-value {
-    font-family: 'DM Mono', monospace; font-size: 19px; font-weight: 500;
-    color: var(--text); line-height: 1.2;
-  }
-
-  .metric-card.highlight .metric-value { color: var(--gold); }
-  .metric-card.green-card .metric-value { color: var(--green); }
-
-  .metric-sub {
-    font-size: 10px; color: var(--text-dim); margin-top: 4px;
-  }
-
-  /* ── Formula callout ── */
-  .formula-box {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--gold);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 28px;
-    display: flex; flex-wrap: wrap; gap: 24px; align-items: center;
-  }
-
-  .formula-item { display: flex; flex-direction: column; gap: 4px; }
-
-  .formula-label {
-    font-size: 10px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 1.5px; color: var(--text-dim);
-  }
-
-  .formula-val {
-    font-family: 'DM Mono', monospace; font-size: 13px;
-    color: var(--gold-light);
-  }
-
-  /* ── Table ── */
-  .table-wrapper {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-  }
-
-  .table-header-bar {
-    padding: 20px 28px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 12px;
-  }
-
-  .table-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px; font-weight: 700; color: var(--text);
-  }
-
-  .table-rates {
-    display: flex; gap: 12px;
-  }
-
-  .rate-badge {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--card2); border: 1px solid var(--border);
-    border-radius: 8px; padding: 6px 12px;
-    font-size: 12px; font-weight: 600; color: var(--text-mid);
-  }
-
-  .rate-badge span { color: var(--gold); font-family: 'DM Mono', monospace; }
-
-  .table-scroll { overflow-x: auto; }
-
-  table {
-    width: 100%; border-collapse: collapse;
-  }
-
-  thead tr {
-    background: linear-gradient(180deg, #1e1a10 0%, #1a1610 100%);
-    border-bottom: 2px solid var(--gold-dim);
-  }
-
-  thead th {
-    padding: 14px 16px;
-    font-size: 10px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 1.5px;
-    color: var(--gold); text-align: right; white-space: nowrap;
-  }
-
-  thead th:first-child { text-align: center; }
-
-  tbody tr {
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    transition: background 0.15s;
-  }
-
-  tbody tr:nth-child(even) { background: var(--row-alt); }
-
-  tbody tr:hover { background: rgba(201,168,76,0.05); }
-
-  tbody td {
-    padding: 11px 16px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px; color: var(--text); text-align: right;
-  }
-
-  tbody td:first-child {
-    text-align: center; font-weight: 600; color: var(--gold-light);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-  }
-
-  .td-begin { color: var(--text-mid) !important; }
-  .td-withdrawal { color: var(--red) !important; }
-  .td-end { color: var(--green) !important; font-weight: 600; }
-
-  /* Last row special */
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:last-child td { font-weight: 700; }
-  tbody tr:last-child .td-end {
-    background: var(--green-dim);
-    border-radius: 6px;
-  }
-
-  /* ── Totals row ── */
-  tfoot tr {
-    background: linear-gradient(180deg, #1a1a0d 0%, #141409 100%);
-    border-top: 2px solid var(--gold-dim);
-  }
-
-  tfoot td {
-    padding: 14px 16px;
-    font-family: 'DM Mono', monospace; font-size: 13px;
-    text-align: right; font-weight: 600; color: var(--gold);
-  }
-
-  tfoot td:first-child {
-    text-align: center; font-family: 'DM Sans', sans-serif;
-    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
-    color: var(--gold-dim);
-  }
-
-  /* ── Insight box ── */
-  .insight-box {
-    margin-top: 28px;
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--blue);
-    border-radius: 12px;
-    padding: 18px 22px;
-    display: flex; gap: 14px; align-items: flex-start;
-  }
-
-  .insight-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
-
-  .insight-text {
-    font-size: 13px; color: var(--text-mid); line-height: 1.7;
-  }
-
-  .insight-text strong { color: var(--gold); font-weight: 600; }
-
-  /* ── Chart ── */
-  .chart-section {
-    margin-top: 32px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px;
-    box-shadow: var(--shadow);
-  }
-
-  .chart-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 17px; font-weight: 700; color: var(--text);
-    margin-bottom: 6px;
-  }
-
-  .chart-sub { font-size: 12px; color: var(--text-dim); margin-bottom: 24px; }
-
-  .chart-legend {
-    display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;
-  }
-
-  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-mid); }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-
-  #chart-canvas { width: 100%; height: 280px; }
-
-  /* ── Responsive ── */
-  @media (max-width: 600px) {
-    .controls-grid { grid-template-columns: 1fr; }
-    .metrics-strip { grid-template-columns: repeat(2, 1fr); }
-    tbody td, tfoot td { padding: 10px 10px; font-size: 12px; }
-    thead th { padding: 12px 10px; }
-  }
-
-  /* ── Animations ── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .controls-card { animation: fadeUp 0.5s ease both; }
-  .metrics-strip  { animation: fadeUp 0.5s 0.1s ease both; }
-  .table-wrapper  { animation: fadeUp 0.5s 0.2s ease both; }
-  .chart-section  { animation: fadeUp 0.5s 0.3s ease both; }
-
-  .value-flash {
-    animation: flash 0.35s ease;
-  }
-
-  @keyframes flash {
-    0%   { opacity: 0.4; }
-    100% { opacity: 1; }
-  }
-
-  /* Number input: hide spinners */
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
-  input[type=number] { -moz-appearance: textfield; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SWP Calculator – Systematic Withdrawal Plan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         #0d0d0f;
+      --surface:    #131316;
+      --card:       #1a1a1f;
+      --card2:      #1f1f26;
+      --border:     #2a2a35;
+      --gold:       #e0b050;
+      --gold-light: #f0cc70;
+      --gold-dim:   #7a6130;
+      --gold-glow:  rgba(224,176,80,0.14);
+      --green:      #3dd68a;
+      --green-dim:  rgba(61,214,138,0.15);
+      --red:        #f06868;
+      --red-dim:    rgba(240,104,104,0.14);
+      --blue:       #6aaee8;
+      --blue-dim:   rgba(106,174,232,0.14);
+      --text:       #f0f2ff;
+      --text-mid:   #d0d4f0;
+      --text-dim:   #a8aed0;
+      --row-alt:    rgba(255,255,255,0.03);
+      --shadow:     0 8px 40px rgba(0,0,0,0.5);
+      --thead-bg1:  #1e1a10;
+      --thead-bg2:  #1a1610;
+      --tfoot-bg1:  #1a1a0d;
+      --tfoot-bg2:  #141409;
+      --dot-stroke: #0d0d0f;
+      --grid-line:  rgba(255,255,255,0.07);
+      --axis-color: rgba(184,188,216,0.6);
+    }
+
+    [data-theme="light"] {
+      --bg:         #f4f5fa;
+      --surface:    #eceef6;
+      --card:       #ffffff;
+      --card2:      #f0f2fa;
+      --border:     #d0d4e8;
+      --gold:       #a06810;
+      --gold-light: #b87c18;
+      --gold-dim:   #c89840;
+      --gold-glow:  rgba(160,104,16,0.10);
+      --green:      #1a9658;
+      --green-dim:  rgba(26,150,88,0.12);
+      --red:        #d03030;
+      --red-dim:    rgba(208,48,48,0.10);
+      --blue:       #1a60b8;
+      --blue-dim:   rgba(26,96,184,0.10);
+      --text:       #080c20;
+      --text-mid:   #2e3560;
+      --text-dim:   #5058a0;
+      --row-alt:    rgba(0,0,0,0.025);
+      --shadow:     0 4px 24px rgba(80,90,140,0.12);
+      --thead-bg1:  #f0ece0;
+      --thead-bg2:  #ece8d8;
+      --tfoot-bg1:  #ede8d8;
+      --tfoot-bg2:  #e8e0cc;
+      --dot-stroke: #f4f5fa;
+      --grid-line:  rgba(0,0,0,0.07);
+      --axis-color: rgba(46,53,96,0.6);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    /* ── Background texture ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 90% 90%, rgba(91,155,213,0.04) 0%, transparent 50%);
+    }
+
+    .container {
+      position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ── Header ── */
+    .header { text-align: center; margin-bottom: 48px; }
+
+    .header-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--gold-glow);
+      border: 1px solid var(--gold-dim);
+      border-radius: 40px;
+      padding: 6px 18px;
+      font-size: 11px; font-weight: 600; letter-spacing: 2px;
+      color: var(--gold); text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .header-badge::before {
+      content: '◆'; font-size: 8px;
+    }
+
+    h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(30px, 5vw, 52px);
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #e8d8a0 0%, var(--gold) 40%, #c08c2a 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .header-sub {
+      color: var(--text-mid); font-size: 17px; font-weight: 500;
+      letter-spacing: 0.2px;
+    }
+
+    /* ── Controls card ── */
+    .controls-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .controls-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .controls-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px; font-weight: 600;
+      color: var(--gold); text-transform: uppercase; letter-spacing: 2px;
+      margin-bottom: 24px;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+
+    .input-label {
+      font-size: 12px; font-weight: 700;
+      color: var(--text-mid); text-transform: uppercase; letter-spacing: 1.5px;
+    }
+
+    .input-wrapper {
+      position: relative; display: flex; align-items: center;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-glow);
+    }
+
+    .input-prefix {
+      padding: 0 14px;
+      color: var(--gold); font-size: 16px; font-weight: 600;
+      border-right: 1px solid var(--border);
+      height: 48px; display: flex; align-items: center;
+      background: var(--gold-glow); flex-shrink: 0;
+    }
+
+    .input-suffix {
+      padding: 0 14px;
+      color: var(--gold); font-size: 14px; font-weight: 600;
+      border-left: 1px solid var(--border);
+      height: 48px; display: flex; align-items: center;
+      background: var(--gold-glow); flex-shrink: 0;
+    }
+
+    .control-input {
+      flex: 1; height: 48px;
+      background: transparent;
+      border: none; outline: none;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 16px; font-weight: 500;
+      padding: 0 16px;
+      text-align: right;
+    }
+
+    .input-hint {
+      font-size: 13px; color: var(--text-mid); letter-spacing: 0.2px;
+    }
+
+    /* Slider */
+    .slider-row { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+
+    input[type="range"] {
+      flex: 1; height: 4px; -webkit-appearance: none;
+      background: linear-gradient(to right, var(--gold) 0%, var(--gold) var(--pct, 50%), var(--border) var(--pct, 50%), var(--border) 100%);
+      border-radius: 4px; cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 18px; height: 18px;
+      background: var(--gold); border-radius: 50%;
+      box-shadow: 0 0 0 3px var(--bg), 0 0 12px var(--gold-glow);
+      transition: transform 0.15s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    .slider-val {
+      font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+      color: var(--gold); min-width: 42px; text-align: right;
+    }
+
+    /* ── Metrics strip ── */
+    .metrics-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .metric-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 18px;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .metric-card:hover { transform: translateY(-2px); border-color: var(--gold-dim); }
+
+    .metric-card.highlight {
+      border-color: var(--gold-dim);
+      background: linear-gradient(135deg, var(--card) 60%, rgba(201,168,76,0.06));
+    }
+
+    .metric-card.green-card {
+      border-color: rgba(45,184,122,0.25);
+      background: linear-gradient(135deg, var(--card) 60%, rgba(45,184,122,0.05));
+    }
+
+    .metric-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--text-mid); margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 600;
+      color: var(--text); line-height: 1.2;
+    }
+
+    .metric-card.highlight .metric-value { color: var(--gold); }
+    .metric-card.green-card .metric-value { color: var(--green); }
+
+    .metric-sub {
+      font-size: 12px; color: var(--text-mid); margin-top: 4px;
+    }
+
+    /* ── Formula callout ── */
+    .formula-box {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: flex; flex-wrap: wrap; gap: 24px; align-items: center;
+    }
+
+    .formula-item { display: flex; flex-direction: column; gap: 4px; }
+
+    .formula-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--text-mid);
+    }
+
+    .formula-val {
+      font-family: 'DM Mono', monospace; font-size: 14px;
+      color: var(--gold-light);
+    }
+
+    /* ── Table ── */
+    .table-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .table-header-bar {
+      padding: 20px 28px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+
+    .table-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 18px; font-weight: 700; color: var(--text);
+    }
+
+    .table-rates {
+      display: flex; gap: 12px;
+    }
+
+    .rate-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 12px;
+      font-size: 13px; font-weight: 600; color: var(--text-mid);
+    }
+
+    .rate-badge span { color: var(--gold); font-family: 'DM Mono', monospace; }
+
+    .table-scroll { overflow-x: auto; }
+
+    table {
+      width: 100%; border-collapse: collapse;
+    }
+
+    thead tr {
+      background: linear-gradient(180deg, var(--thead-bg1) 0%, var(--thead-bg2) 100%);
+      border-bottom: 2px solid var(--gold-dim);
+    }
+
+    thead th {
+      padding: 14px 20px;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--gold); text-align: right; white-space: nowrap;
+    }
+
+    thead th:first-child { text-align: center; }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s;
+    }
+
+    tbody tr:nth-child(even) { background: var(--row-alt); }
+
+    tbody tr:hover { background: rgba(201,168,76,0.05); }
+
+    tbody td {
+      padding: 13px 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 14px; color: var(--text); text-align: right;
+      letter-spacing: 0.02em;
+    }
+
+    tbody td:first-child {
+      text-align: center; font-weight: 700; color: var(--gold-light);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+    }
+
+    .td-begin { color: var(--text-mid) !important; }
+    .td-withdrawal { color: var(--red) !important; font-weight: 600; }
+    .td-end { color: var(--green) !important; font-weight: 700; }
+
+    /* Last row special */
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:last-child td { font-weight: 700; }
+    tbody tr:last-child .td-end {
+      background: var(--green-dim);
+      border-radius: 6px;
+    }
+
+    /* ── Totals row ── */
+    tfoot tr {
+      background: linear-gradient(180deg, var(--tfoot-bg1) 0%, var(--tfoot-bg2) 100%);
+      border-top: 2px solid var(--gold-dim);
+    }
+
+    tfoot td {
+      padding: 15px 20px;
+      font-family: 'DM Mono', monospace; font-size: 14px;
+      text-align: right; font-weight: 700; color: var(--gold);
+      letter-spacing: 0.02em;
+    }
+
+    tfoot td:first-child {
+      text-align: center; font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--gold-dim);
+    }
+
+    /* ── Insight box ── */
+    .insight-box {
+      margin-top: 28px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--blue);
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+
+    .insight-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+    .insight-text {
+      font-size: 15px; color: var(--text-mid); line-height: 1.75;
+    }
+
+    .insight-text strong { color: var(--gold); font-weight: 600; }
+
+    /* ── Chart ── */
+    .chart-section {
+      margin-top: 32px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 17px; font-weight: 700; color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .chart-sub { font-size: 14px; color: var(--text-mid); margin-bottom: 24px; }
+
+    .chart-legend {
+      display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-mid); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    #chart-canvas { width: 100%; height: 280px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .controls-grid { grid-template-columns: 1fr; }
+      .metrics-strip { grid-template-columns: repeat(2, 1fr); }
+      tbody td, tfoot td { padding: 10px 10px; font-size: 12px; }
+      thead th { padding: 12px 10px; }
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .controls-card { animation: fadeUp 0.5s ease both; }
+    .metrics-strip  { animation: fadeUp 0.5s 0.1s ease both; }
+    .table-wrapper  { animation: fadeUp 0.5s 0.2s ease both; }
+    .chart-section  { animation: fadeUp 0.5s 0.3s ease both; }
+
+    .value-flash {
+      animation: flash 0.35s ease;
+    }
+
+    @keyframes flash {
+      0%   { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    /* ── Theme Toggle ── */
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0 0 24px 0;
+    }
+
+    .theme-toggle {
+      position: relative;
+      width: 54px; height: 28px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.35s, border-color 0.35s;
+      outline: none;
+      flex-shrink: 0;
+    }
+    .theme-toggle:focus-visible { box-shadow: 0 0 0 2px var(--gold); }
+
+    .toggle-knob {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; line-height: 1;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), background 0.3s;
+      user-select: none;
+    }
+    [data-theme="light"] .toggle-knob { transform: translateX(26px); }
+
+    /* ── Light mode overrides ── */
+    [data-theme="light"] .controls-card,
+    [data-theme="light"] .table-wrapper,
+    [data-theme="light"] .chart-section,
+    [data-theme="light"] .metric-card,
+    [data-theme="light"] .formula-box,
+    [data-theme="light"] .insight-box { box-shadow: var(--shadow); }
+
+    [data-theme="light"] input[type="range"]::-webkit-slider-thumb {
+      box-shadow: 0 0 0 3px var(--bg), 0 0 8px var(--gold-glow);
+    }
+
+    [data-theme="light"] .control-input { color: var(--text); }
+
+    /* Number input: hide spinners */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
 </head>
 <body>
 <div class="container">
+
+  <!-- Theme toggle -->
+  <div class="top-bar">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">
+      <div class="toggle-knob" id="toggleKnob">🌙</div>
+    </button>
+  </div>
 
   <!-- Header -->
   <div class="header">
@@ -573,21 +668,21 @@
     <div class="table-scroll">
       <table>
         <thead>
-          <tr>
-            <th style="text-align:center">Year</th>
-            <th>Opening Balance</th>
-            <th>Monthly Withdrawal</th>
-            <th>End Value</th>
-          </tr>
+        <tr>
+          <th style="text-align:center">Year</th>
+          <th>Opening Balance</th>
+          <th>Monthly Withdrawal</th>
+          <th>End Value</th>
+        </tr>
         </thead>
         <tbody id="swp-tbody"></tbody>
         <tfoot>
-          <tr>
-            <td>25 Yrs</td>
-            <td id="foot-begin">—</td>
-            <td id="foot-total-w">—</td>
-            <td id="foot-final">—</td>
-          </tr>
+        <tr>
+          <td>25 Yrs</td>
+          <td id="foot-begin">—</td>
+          <td id="foot-total-w">—</td>
+          <td id="foot-final">—</td>
+        </tr>
         </tfoot>
       </table>
     </div>
@@ -616,281 +711,312 @@
 </div>
 
 <script>
-// ─────────────────────────────────────────────────────────────────────────
-// CORE CALCULATION ENGINE
-// ─────────────────────────────────────────────────────────────────────────
-function calcSWP(capital, annualReturn, withdrawalRate, years = 25) {
-  const monthlyRate = Math.pow(1 + annualReturn, 1/12) - 1;
-  const rows = [];
-  let bal = capital;
-  let cumWithdrawal = 0;
+  // ─────────────────────────────────────────────────────────────────────────
+  // CORE CALCULATION ENGINE
+  // ─────────────────────────────────────────────────────────────────────────
+  function calcSWP(capital, annualReturn, withdrawalRate, years = 25) {
+    const monthlyRate = Math.pow(1 + annualReturn, 1/12) - 1;
+    const rows = [];
+    let bal = capital;
+    let cumWithdrawal = 0;
 
-  for (let yr = 1; yr <= years; yr++) {
-    const opening    = bal;
-    const monthlyW   = opening * withdrawalRate / 12;
-    // FV formula: opening*(1+r)^12 - w*((1+r)^12 - 1)/r
-    const factor     = Math.pow(1 + monthlyRate, 12);
-    const endValue   = opening * factor - monthlyW * (factor - 1) / monthlyRate;
-    const annualW    = monthlyW * 12;
-    cumWithdrawal   += annualW;
+    for (let yr = 1; yr <= years; yr++) {
+      const opening    = bal;
+      const monthlyW   = opening * withdrawalRate / 12;
+      // FV formula: opening*(1+r)^12 - w*((1+r)^12 - 1)/r
+      const factor     = Math.pow(1 + monthlyRate, 12);
+      const endValue   = opening * factor - monthlyW * (factor - 1) / monthlyRate;
+      const annualW    = monthlyW * 12;
+      cumWithdrawal   += annualW;
 
-    rows.push({ yr, opening, monthlyW, annualW, endValue, cumWithdrawal });
-    bal = endValue;
+      rows.push({ yr, opening, monthlyW, annualW, endValue, cumWithdrawal });
+      bal = endValue;
+    }
+    return { rows, monthlyRate };
   }
-  return { rows, monthlyRate };
-}
 
-// ─────────────────────────────────────────────────────────────────────────
-// FORMATTING HELPERS
-// ─────────────────────────────────────────────────────────────────────────
-function fmtINR(n, decimals = 2) {
-  if (Math.abs(n) >= 1e7)
-    return '₹' + (n/1e7).toFixed(2) + ' Cr';
-  if (Math.abs(n) >= 1e5)
-    return '₹' + (n/1e5).toFixed(2) + ' L';
-  return '₹' + n.toLocaleString('en-IN', {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
-}
+  // ─────────────────────────────────────────────────────────────────────────
+  // FORMATTING HELPERS
+  // ─────────────────────────────────────────────────────────────────────────
 
-function fmtINRFull(n) {
-  return '₹' + n.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-}
+  // Metric cards & insight text: ₹2.50 Cr / ₹20.50 L / ₹13,333
+  function fmtINRShort(n) {
+    if (n >= 1e7)  return '₹' + (n / 1e7).toFixed(2) + ' Cr';
+    if (n >= 1e5)  return '₹' + (n / 1e5).toFixed(2) + ' L';
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
 
-function fmtINRShort(n) {
-  if (n >= 1e7)  return '₹' + (n/1e7).toFixed(2) + ' Cr';
-  if (n >= 1e5)  return '₹' + (n/1e5).toFixed(2) + ' L';
-  return '₹' + Math.round(n).toLocaleString('en-IN');
-}
+  // Table corpus columns: always in L or Cr, no raw large numbers
+  function fmtINRTable(n) {
+    if (n >= 1e7)  return '₹' + (n / 1e7).toFixed(2) + ' Cr';
+    if (n >= 1e5)  return '₹' + (n / 1e5).toFixed(2) + ' L';
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
 
-function pct(n, d=4) { return (n * 100).toFixed(d) + '%'; }
+  // Monthly withdrawal: clean Indian format, no decimals
+  function fmtINRFull(n) {
+    if (n >= 1e5)  return '₹' + (n / 1e5).toFixed(2) + ' L';
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
 
-function lakhLabel(n) {
-  if (n >= 1e7) return '₹' + (n/1e7).toFixed(1) + 'Cr';
-  return '₹' + (n/1e5).toFixed(0) + 'L';
-}
+  // Comma format for Initial Capital: ₹20,00,000
+  function fmtINRComma(n) {
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
 
-// ─────────────────────────────────────────────────────────────────────────
-// CHART
-// ─────────────────────────────────────────────────────────────────────────
-let chartData = { labels:[], series1:[], series2:[], series3:[] };
+  function pct(n, d=4) { return (n * 100).toFixed(d) + '%'; }
 
-function drawChart() {
-  const canvas = document.getElementById('chart-canvas');
-  const dpr = window.devicePixelRatio || 1;
-  const W = canvas.offsetWidth, H = canvas.offsetHeight;
-  canvas.width  = W * dpr;
-  canvas.height = H * dpr;
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
+  // Slider label: ₹20 L / ₹1 Cr
+  function lakhLabel(n) {
+    if (n >= 1e7) return '₹' + (n / 1e7).toFixed(1) + ' Cr';
+    return '₹' + (n / 1e5).toFixed(0) + ' L';
+  }
 
-  const pad = { top:10, right:20, bottom:40, left:68 };
-  const cW = W - pad.left - pad.right;
-  const cH = H - pad.top  - pad.bottom;
+  // ─────────────────────────────────────────────────────────────────────────
+  // CHART
+  // ─────────────────────────────────────────────────────────────────────────
+  let chartData = { labels:[], series1:[], series2:[], series3:[] };
 
-  ctx.clearRect(0,0,W,H);
+  function drawChart() {
+    const canvas = document.getElementById('chart-canvas');
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.offsetWidth, H = canvas.offsetHeight;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
 
-  const { labels, series1, series2, series3 } = chartData;
-  const allVals = [...series1, ...series2, ...series3];
-  const maxV = Math.max(...allVals) * 1.06;
-  const minV = 0;
+    const pad = { top:10, right:20, bottom:40, left:68 };
+    const cW = W - pad.left - pad.right;
+    const cH = H - pad.top  - pad.bottom;
 
-  const xScale = i => pad.left + (i / (labels.length - 1)) * cW;
-  const yScale = v => pad.top + cH - ((v - minV) / (maxV - minV)) * cH;
+    ctx.clearRect(0,0,W,H);
 
-  // Grid lines
-  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-  ctx.lineWidth = 1;
-  for (let i=0; i<=5; i++) {
-    const y = pad.top + (i/5)*cH;
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left+cW, y); ctx.stroke();
-    const val = maxV - (i/5)*(maxV-minV);
-    ctx.fillStyle = 'rgba(152,152,168,0.5)';
+    const { labels, series1, series2, series3 } = chartData;
+    const allVals = [...series1, ...series2, ...series3];
+    const maxV = Math.max(...allVals) * 1.06;
+    const minV = 0;
+
+    const xScale = i => pad.left + (i / (labels.length - 1)) * cW;
+    const yScale = v => pad.top + cH - ((v - minV) / (maxV - minV)) * cH;
+
+    // Grid lines
+    const isLight = document.documentElement.dataset.theme === 'light';
+    ctx.strokeStyle = isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 1;
+    for (let i=0; i<=5; i++) {
+      const y = pad.top + (i/5)*cH;
+      ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left+cW, y); ctx.stroke();
+      const val = maxV - (i/5)*(maxV-minV);
+      ctx.fillStyle = isLight ? 'rgba(46,53,96,0.7)' : 'rgba(184,188,216,0.7)';
+      ctx.font = '10px DM Mono, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(fmtINRShort(val), pad.left - 6, y + 4);
+    }
+
+    // X axis labels
+    ctx.fillStyle = isLight ? 'rgba(46,53,96,0.7)' : 'rgba(184,188,216,0.7)';
     ctx.font = '10px DM Mono, monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText(fmtINRShort(val), pad.left - 6, y + 4);
-  }
+    ctx.textAlign = 'center';
+    const step = Math.ceil(labels.length / 8);
+    for (let i=0; i<labels.length; i+=step) {
+      ctx.fillText('Yr ' + labels[i], xScale(i), H - pad.bottom + 16);
+    }
 
-  // X axis labels
-  ctx.fillStyle = 'rgba(152,152,168,0.5)';
-  ctx.font = '10px DM Mono, monospace';
-  ctx.textAlign = 'center';
-  const step = Math.ceil(labels.length / 8);
-  for (let i=0; i<labels.length; i+=step) {
-    ctx.fillText('Yr ' + labels[i], xScale(i), H - pad.bottom + 16);
-  }
-
-  // Draw a line
-  function drawLine(series, color, lineWidth=2, fill=false) {
-    ctx.beginPath();
-    series.forEach((v,i) => { const x=xScale(i), y=yScale(v); i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y); });
-    if (fill) {
-      const last = series.length - 1;
-      ctx.lineTo(xScale(last), pad.top+cH);
-      ctx.lineTo(xScale(0), pad.top+cH);
-      ctx.closePath();
-      ctx.fillStyle = color.replace(')', ',0.08)').replace('rgb','rgba');
-      ctx.fill();
+    // Draw a line
+    function drawLine(series, color, lineWidth=2, fill=false) {
       ctx.beginPath();
       series.forEach((v,i) => { const x=xScale(i), y=yScale(v); i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y); });
+      if (fill) {
+        const last = series.length - 1;
+        ctx.lineTo(xScale(last), pad.top+cH);
+        ctx.lineTo(xScale(0), pad.top+cH);
+        ctx.closePath();
+        ctx.fillStyle = color.replace(')', ',0.08)').replace('rgb','rgba');
+        ctx.fill();
+        ctx.beginPath();
+        series.forEach((v,i) => { const x=xScale(i), y=yScale(v); i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y); });
+      }
+      ctx.strokeStyle = color; ctx.lineWidth = lineWidth;
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.stroke();
     }
-    ctx.strokeStyle = color; ctx.lineWidth = lineWidth;
-    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    ctx.stroke();
+
+    // Fill areas
+    drawLine(series1, '#5b9bd5', 2.5, true);
+    drawLine(series2, '#2db87a', 2.5, true);
+    drawLine(series3, '#e05c5c', 2, true);
+
+    // Dots at last point
+    [[series1,'#5b9bd5'],[series2,'#2db87a'],[series3,'#e05c5c']].forEach(([s,c]) => {
+      const i = s.length-1;
+      ctx.beginPath();
+      ctx.arc(xScale(i), yScale(s[i]), 4, 0, 2*Math.PI);
+      ctx.fillStyle = c; ctx.fill();
+      ctx.strokeStyle = isLight ? '#f4f5fa' : '#0d0f17'; ctx.lineWidth = 2; ctx.stroke();
+    });
   }
 
-  // Fill areas
-  drawLine(series1, '#5b9bd5', 2.5, true);
-  drawLine(series2, '#2db87a', 2.5, true);
-  drawLine(series3, '#e05c5c', 2, true);
+  // ─────────────────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────────────────
+  function render() {
+    const capital      = parseFloat(document.getElementById('capital').value)        || 2000000;
+    const annualReturn = parseFloat(document.getElementById('return-rate').value)    / 100 || 0.10;
+    const withdrawalR  = parseFloat(document.getElementById('withdrawal-rate').value)/ 100 || 0.08;
 
-  // Dots at last point
-  [[series1,'#5b9bd5'],[series2,'#2db87a'],[series3,'#e05c5c']].forEach(([s,c]) => {
-    const i = s.length-1;
-    ctx.beginPath();
-    ctx.arc(xScale(i), yScale(s[i]), 4, 0, 2*Math.PI);
-    ctx.fillStyle = c; ctx.fill();
-    ctx.strokeStyle = '#0d0d0f'; ctx.lineWidth = 2; ctx.stroke();
-  });
-}
+    const { rows, monthlyRate } = calcSWP(capital, annualReturn, withdrawalR);
 
-// ─────────────────────────────────────────────────────────────────────────
-// RENDER
-// ─────────────────────────────────────────────────────────────────────────
-function render() {
-  const capital      = parseFloat(document.getElementById('capital').value)        || 2000000;
-  const annualReturn = parseFloat(document.getElementById('return-rate').value)    / 100 || 0.10;
-  const withdrawalR  = parseFloat(document.getElementById('withdrawal-rate').value)/ 100 || 0.08;
+    const lastRow       = rows[rows.length - 1];
+    const firstRow      = rows[0];
+    const totalAnnualW  = rows.reduce((s,r) => s + r.annualW, 0);
+    const totalMonthlyW = rows.reduce((s,r) => s + r.monthlyW * 12, 0);
+    const finalCorpus   = lastRow.endValue;
+    const multiple      = finalCorpus / capital;
+    const net           = finalCorpus - capital;
+    const survives      = finalCorpus > capital;
 
-  const { rows, monthlyRate } = calcSWP(capital, annualReturn, withdrawalR);
+    const netMonthly    = monthlyRate - (withdrawalR / 12);
+    const effAnnual     = Math.pow(1 + netMonthly, 12) - 1;
 
-  const lastRow       = rows[rows.length - 1];
-  const firstRow      = rows[0];
-  const totalAnnualW  = rows.reduce((s,r) => s + r.annualW, 0);
-  const totalMonthlyW = rows.reduce((s,r) => s + r.monthlyW * 12, 0);
-  const finalCorpus   = lastRow.endValue;
-  const multiple      = finalCorpus / capital;
-  const net           = finalCorpus - capital;
-  const survives      = finalCorpus > capital;
+    // ── Formula bar ──
+    document.getElementById('f-monthly-rate').textContent =
+      `(1 + ${(annualReturn*100).toFixed(1)}%)^(1/12) − 1 = ${pct(monthlyRate)}`;
+    document.getElementById('f-monthly-w').textContent =
+      `Opening × ${(withdrawalR*100).toFixed(1)}% ÷ 12 = ${(withdrawalR/12*100).toFixed(4)}%/mo`;
+    const netSign = netMonthly >= 0 ? '+' : '';
+    document.getElementById('f-net-growth').textContent =
+      `${pct(monthlyRate)} − ${(withdrawalR/12*100).toFixed(4)}% = ${netSign}${pct(netMonthly)}/mo`;
+    document.getElementById('f-annual-growth').textContent =
+      `${effAnnual >= 0 ? '▲' : '▼'} ${(effAnnual*100).toFixed(2)}% p.a.`;
+    document.getElementById('f-annual-growth').style.color = effAnnual >= 0 ? 'var(--green)' : 'var(--red)';
 
-  const netMonthly    = monthlyRate - (withdrawalR / 12);
-  const effAnnual     = Math.pow(1 + netMonthly, 12) - 1;
+    // ── Badges ──
+    document.getElementById('badge-return').textContent     = (annualReturn*100).toFixed(1) + '%';
+    document.getElementById('badge-withdrawal').textContent = (withdrawalR*100).toFixed(1) + '%';
 
-  // ── Formula bar ──
-  document.getElementById('f-monthly-rate').textContent =
-    `(1 + ${(annualReturn*100).toFixed(1)}%)^(1/12) − 1 = ${pct(monthlyRate)}`;
-  document.getElementById('f-monthly-w').textContent =
-    `Opening × ${(withdrawalR*100).toFixed(1)}% ÷ 12 = ${(withdrawalR/12*100).toFixed(4)}%/mo`;
-  const netSign = netMonthly >= 0 ? '+' : '';
-  document.getElementById('f-net-growth').textContent =
-    `${pct(monthlyRate)} − ${(withdrawalR/12*100).toFixed(4)}% = ${netSign}${pct(netMonthly)}/mo`;
-  document.getElementById('f-annual-growth').textContent =
-    `${effAnnual >= 0 ? '▲' : '▼'} ${(effAnnual*100).toFixed(2)}% p.a.`;
-  document.getElementById('f-annual-growth').style.color = effAnnual >= 0 ? 'var(--green)' : 'var(--red)';
+    // ── Metrics ──
+    setVal('m-capital',     fmtINRComma(capital));
+    setVal('m-final',       fmtINRShort(finalCorpus));
+    setVal('m-total-w',     fmtINRShort(totalMonthlyW));
+    setVal('m-yr1-monthly', fmtINRShort(firstRow.monthlyW));
+    setVal('m-yr25-monthly',fmtINRShort(lastRow.monthlyW));
+    setVal('m-multiple',    multiple.toFixed(2) + 'x');
 
-  // ── Badges ──
-  document.getElementById('badge-return').textContent     = (annualReturn*100).toFixed(1) + '%';
-  document.getElementById('badge-withdrawal').textContent = (withdrawalR*100).toFixed(1) + '%';
+    document.getElementById('m-final').style.color    = survives ? 'var(--green)' : 'var(--red)';
+    document.getElementById('m-multiple').style.color = survives ? 'var(--gold)' : 'var(--red)';
 
-  // ── Metrics ──
-  setVal('m-capital',     fmtINRShort(capital));
-  setVal('m-final',       fmtINRShort(finalCorpus));
-  setVal('m-total-w',     fmtINRShort(totalMonthlyW));
-  setVal('m-yr1-monthly', fmtINRShort(firstRow.monthlyW));
-  setVal('m-yr25-monthly',fmtINRShort(lastRow.monthlyW));
-  setVal('m-multiple',    multiple.toFixed(2) + 'x');
+    // ── Table ──
+    const tbody = document.getElementById('swp-tbody');
+    tbody.innerHTML = '';
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.yr}</td>
+        <td class="td-begin">${fmtINRTable(r.opening)}</td>
+        <td class="td-withdrawal">${fmtINRFull(r.monthlyW)}</td>
+        <td class="td-end">${fmtINRTable(r.endValue)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
 
-  document.getElementById('m-final').style.color    = survives ? 'var(--green)' : 'var(--red)';
-  document.getElementById('m-multiple').style.color = survives ? 'var(--gold)' : 'var(--red)';
+    // ── Footer ──
+    document.getElementById('foot-begin').textContent   = fmtINRTable(capital);
+    document.getElementById('foot-total-w').textContent = fmtINRFull(totalMonthlyW / 25 / 12) + ' /mo avg';
+    document.getElementById('foot-final').textContent   = fmtINRTable(finalCorpus);
 
-  // ── Table ──
-  const tbody = document.getElementById('swp-tbody');
-  tbody.innerHTML = '';
-  rows.forEach(r => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${r.yr}</td>
-      <td class="td-begin">${fmtINRFull(r.opening)}</td>
-      <td class="td-withdrawal">${fmtINRFull(r.monthlyW)}</td>
-      <td class="td-end">${fmtINRFull(r.endValue)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+    // ── Insight ──
+    const net_r = ((annualReturn - withdrawalR)*100).toFixed(1);
+    const status = survives
+      ? `<strong>✅ Capital Survives & Grows</strong> — Since Return (${(annualReturn*100).toFixed(1)}%) > Withdrawal (${(withdrawalR*100).toFixed(1)}%), `
+      : `<strong>⚠️ Capital Being Depleted</strong> — Since Withdrawal (${(withdrawalR*100).toFixed(1)}%) > Return (${(annualReturn*100).toFixed(1)}%), `;
 
-  // ── Footer ──
-  document.getElementById('foot-begin').textContent  = fmtINRFull(capital);
-  document.getElementById('foot-total-w').textContent = fmtINRFull(totalMonthlyW / 25 / 12) + ' /mo avg';
-  document.getElementById('foot-final').textContent  = fmtINRFull(finalCorpus);
+    document.getElementById('insight-text').innerHTML = status +
+      `net corpus grows at <strong>~${(effAnnual*100).toFixed(2)}% p.a.</strong> effective. ` +
+      `Monthly withdrawal starts at <strong>${fmtINRShort(firstRow.monthlyW)}</strong> and ` +
+      `${survives ? 'grows to' : 'falls to'} <strong>${fmtINRShort(lastRow.monthlyW)}</strong> by Year 25 ` +
+      `as it tracks the opening corpus. Total payouts over 25 years: <strong>${fmtINRShort(totalMonthlyW)}</strong>. ` +
+      `Formula used: <strong>FV((1+r)^(1/12)−1, 12, −monthly_w, −opening)</strong> with monthly compounding.`;
 
-  // ── Insight ──
-  const net_r = ((annualReturn - withdrawalR)*100).toFixed(1);
-  const status = survives
-    ? `<strong>✅ Capital Survives & Grows</strong> — Since Return (${(annualReturn*100).toFixed(1)}%) > Withdrawal (${(withdrawalR*100).toFixed(1)}%), `
-    : `<strong>⚠️ Capital Being Depleted</strong> — Since Withdrawal (${(withdrawalR*100).toFixed(1)}%) > Return (${(annualReturn*100).toFixed(1)}%), `;
-
-  document.getElementById('insight-text').innerHTML = status +
-    `net corpus grows at <strong>~${(effAnnual*100).toFixed(2)}% p.a.</strong> effective. ` +
-    `Monthly withdrawal starts at <strong>${fmtINRShort(firstRow.monthlyW)}</strong> and ` +
-    `${survives ? 'grows to' : 'falls to'} <strong>${fmtINRShort(lastRow.monthlyW)}</strong> by Year 25 ` +
-    `as it tracks the opening corpus. Total payouts over 25 years: <strong>${fmtINRShort(totalMonthlyW)}</strong>. ` +
-    `Formula used: <strong>FV((1+r)^(1/12)−1, 12, −monthly_w, −opening)</strong> with monthly compounding.`;
-
-  // ── Chart data ──
-  chartData = {
-    labels:  rows.map(r => r.yr),
-    series1: rows.map(r => r.opening),
-    series2: rows.map(r => r.endValue),
-    series3: rows.map(r => r.monthlyW),
-  };
-  drawChart();
-}
-
-function setVal(id, val) {
-  const el = document.getElementById(id);
-  el.textContent = val;
-  el.classList.remove('value-flash');
-  void el.offsetWidth;
-  el.classList.add('value-flash');
-}
-
-// ─────────────────────────────────────────────────────────────────────────
-// SLIDER SYNC
-// ─────────────────────────────────────────────────────────────────────────
-function syncSlider(rangeId, inputId, labelId, fmt) {
-  const range = document.getElementById(rangeId);
-  const input = document.getElementById(inputId);
-  const label = document.getElementById(labelId);
-
-  function updatePct() {
-    const min = +range.min, max = +range.max, val = +range.value;
-    const pct = ((val-min)/(max-min))*100;
-    range.style.setProperty('--pct', pct + '%');
+    // ── Chart data ──
+    chartData = {
+      labels:  rows.map(r => r.yr),
+      series1: rows.map(r => r.opening),
+      series2: rows.map(r => r.endValue),
+      series3: rows.map(r => r.monthlyW),
+    };
+    drawChart();
   }
 
-  range.addEventListener('input', () => {
-    input.value = range.value;
-    label.textContent = fmt(range.value);
+  function setVal(id, val) {
+    const el = document.getElementById(id);
+    el.textContent = val;
+    el.classList.remove('value-flash');
+    void el.offsetWidth;
+    el.classList.add('value-flash');
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // SLIDER SYNC
+  // ─────────────────────────────────────────────────────────────────────────
+  function syncSlider(rangeId, inputId, labelId, fmt) {
+    const range = document.getElementById(rangeId);
+    const input = document.getElementById(inputId);
+    const label = document.getElementById(labelId);
+
+    function updatePct() {
+      const min = +range.min, max = +range.max, val = +range.value;
+      const pct = ((val-min)/(max-min))*100;
+      range.style.setProperty('--pct', pct + '%');
+    }
+
+    range.addEventListener('input', () => {
+      input.value = range.value;
+      label.textContent = fmt(range.value);
+      updatePct();
+      render();
+    });
+
+    input.addEventListener('input', () => {
+      range.value = input.value;
+      label.textContent = fmt(input.value);
+      updatePct();
+      render();
+    });
+
     updatePct();
-    render();
+  }
+
+  syncSlider('capital-range',    'capital',         'capital-slider-val',    v => lakhLabel(+v));
+  syncSlider('return-range',     'return-rate',     'return-slider-val',     v => (+v).toFixed(1)+'%');
+  syncSlider('withdrawal-range', 'withdrawal-rate', 'withdrawal-slider-val', v => (+v).toFixed(1)+'%');
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // THEME TOGGLE
+  // ─────────────────────────────────────────────────────────────────────────
+  const toggleBtn  = document.getElementById('themeToggle');
+  const toggleKnob = document.getElementById('toggleKnob');
+
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    toggleKnob.textContent = theme === 'light' ? '☀️' : '🌙';
+    localStorage.setItem('swp25-theme', theme);
+    drawChart(); // redraw with new colors
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    applyTheme(next);
   });
 
-  input.addEventListener('input', () => {
-    range.value = input.value;
-    label.textContent = fmt(input.value);
-    updatePct();
-    render();
-  });
+  // Restore saved preference
+  applyTheme(localStorage.getItem('swp25-theme') || 'dark');
 
-  updatePct();
-}
+  // Resize chart on window resize
+  window.addEventListener('resize', drawChart);
 
-syncSlider('capital-range',    'capital',         'capital-slider-val',    v => lakhLabel(+v));
-syncSlider('return-range',     'return-rate',     'return-slider-val',     v => (+v).toFixed(1)+'%');
-syncSlider('withdrawal-range', 'withdrawal-rate', 'withdrawal-slider-val', v => (+v).toFixed(1)+'%');
-
-// Resize chart on window resize
-window.addEventListener('resize', drawChart);
-
-// Initial render
-render();
+  // Initial render
+  render();
 </script>
 </body>
 </html>
